@@ -44,10 +44,10 @@ def findSignal(Int, Err):
     """
     Takes an int and an err and returns int/err
     """
-    if numpy.isnan(Int) or numpy.isnan(Err) == True:
+    if np.isnan(Int) or np.isnan(Err) == True:
         SN = float("nan")
     elif Int or Err == 0.0:
         SN = 0.0
-    else
+    else:
         SN = float(Int)/float(Err)
     return(SN)
