@@ -32,11 +32,22 @@ def nonZeroErrArray(errVals, usedErr):
             nonZErr.append(usedErr)
     return(nonZErr)   
 
-def findSignal(Int, Err):
+def findSignalArray(Int, Err):
     """
     Takes an array of measured values and an array of their errors and returns the SNR array.
     """
     SN = []
     for i in range(len(Int)):
         SN.append(Int[i]/Err[i])
+    return(SN)
+def findSignal(Int, Err):
+    """
+    Takes an int and an err and returns int/err
+    """
+    if numpy.isnan(Int) or numpy.isnan(Err) == True:
+        SN = float(nan)
+    elif Int or Err == 0.0:
+        SN = 0.0
+    else
+        SN = float(Int)/float(Err)
     return(SN)
