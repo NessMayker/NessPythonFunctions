@@ -45,8 +45,6 @@ def findSignal(Int, Err):
     """
     Takes an int and a non-zero err and returns int/err
     """
-    
-    usedErr = findErrVals(ErrArr)
 
     if np.isnan(Int) or np.isnan(Err) == True:
         SN = float("nan")
