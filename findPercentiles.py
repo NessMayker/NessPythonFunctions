@@ -18,7 +18,8 @@ def findStats(fracArray, valsArray):
 	import numpy as np
 
 	import sys
-	sys.path.append('/Users/nessmayker/Desktop/NessPythonFunctions')
+	#sys.path.append('/Users/nessmayker/Desktop/NessPythonFunctions')
+	sys.path.append('/home/mayker.1/Desktop/NessPythonFunctions')
 	from findAtIndex import atIndex
 
 	K = [0.05,0.16,0.5,0.84,0.95]
