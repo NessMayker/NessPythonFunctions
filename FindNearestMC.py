@@ -1,6 +1,9 @@
 """
 Holds functions useful for finding the nearest MC to a location in a galaxy.
 """
+import numpy as np
+from astropy.table import Table
+import os
 
 
 def int2mass(x, aco, res=150.0):
@@ -50,7 +53,7 @@ def printNearest(filestr, kind, value, SNRcutoff = 3.0, test = "SNe", distList =
         else:
             return(np.float('nan'),np.float('nan'))
     else:
-        fileName = "/home/mayker.1/Desktop/SNeCO_Data_Products/FlatGalaxyMaps/{}FlatSNeData.txt".format(filestr)
+        fileName = "/home/mayker.1/Desktop/SNeCO_Data_Products/FlatGalaxyMaps/{}FlatData.txt".format(filestr)
         if os.path.isfile(fileName):
             flatData = Table.read(fileName, format = "ascii") 
             distArr = distList
@@ -62,7 +65,7 @@ def printNearest(filestr, kind, value, SNRcutoff = 3.0, test = "SNe", distList =
     for i in range(len(flatData)):
         if (flatData["SNR"][i] >= SNRcutoff):
             intenCut.append(flatData["Intensity"][i])
-            distCut.append(distArr)
+            distCut.append(distArr[i])
             massCut.append(flatData["mass"][i])
 
     if kind == 'SNR':

@@ -1,6 +1,7 @@
 """
 Calculates the distance between two points in a galaxy
 """
+import numpy as np
 
 def distance(x1, x2, y1, y2, galDist):
     #calculate distance between two points (in kpc)
