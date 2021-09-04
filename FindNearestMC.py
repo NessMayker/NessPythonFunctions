@@ -2,9 +2,6 @@
 Holds functions useful for finding the nearest MC to a location in a galaxy.
 """
 import numpy as np
-from astropy.table import Table
-import os
-
 
 def int2mass(x, aco, res=150.0):
     area = (res/2.0)**2*np.pi/np.log(2.0)
@@ -16,63 +13,26 @@ def mass2int(mass, aco, res=150.0):
     inten = mass / (aco * area)
     return(inten)
 
-def arraySort(variable, distance):
-    # sorts variable by shortest distance
-    pattern = distance.argsort()
-    dist = distance[pattern]
-    var = variable[pattern]
-    return (var, dist)
+def angDistToPc(x,galDist):
+    return(galDist*1000*np.tan(x*np.pi/180))
 
-def findNearest(varArray, value, distArray):
-    # sorts variable by distance, returning closest with given value and that value
-    var, dist = arraySort(varArray, distArray) 
-    ind = np.where(var >= value)
+def findNearest(x1,x2,y1,y2):
+    # Where x1 & y1 are 1d arrays of map coordinates
+    # x2,y2 are the coords of the SNe
+    n = len(x1)
+    m = len(x2)
+    if n != 0:
+        x1Vec = np.tile(x1, (m,1)) #constant x along column
+        y1Vec = np.tile(y1, (m,1)) #constant y along column
+        x2Vec = np.tile(x2, (n,1)) #constant x along column
+        y2Vec = np.tile(y2, (n,1)) #constant y along column
+        x2Vec = np.transpose(x2Vec) #constant x along rows
+        y2Vec = np.transpose(y2Vec) #constant y along rows
+
+        dist = np.sqrt((x1Vec-x2Vec)**2 + (y1Vec-y2Vec)**2)    
+
+        mindist = np.nanmin(dist, axis = 1)
+    else: 
+        mindist = float("nan")
     
-    if len(dist[ind]) > 0:
-        nearest    = np.argmin(dist[ind])
-        nearDist   = dist[ind][nearest] * 1000
-        varVal     = var[ind][nearest]
-    else:
-        nearDist   = float('nan')
-        varVal     = float('nan')
-        
-    return(varVal, nearDist)
-
-
-def printNearest(filestr, kind, value, SNRcutoff = 3.0, test = "SNe", distList = None):
-    # takes galaxy name, kind of sorting (SNR, Intensity, or Mass), and value we want (min SNR, intensity, or mass) 
-    # and returns distance to the nearest molecular cloud and the min value found of kind requested
-    # setting test to anything other than "SNe" will access the flat galaxy maps for running the model SNe pop.
-    # If running the model population, distList must be used to pass the list of random distances.
-            
-    if test == "SNe":
-        fileName = "/home/mayker.1/Desktop/SNeCO_Data_Products/FlatSNeDistanceMaps/{}FlatSNeData.txt".format(filestr)
-        if os.path.isfile(fileName):
-            flatData = Table.read(fileName, format = "ascii") 
-            distArr = flatData["distSNe"][i]
-        else:
-            return(np.float('nan'),np.float('nan'))
-    else:
-        fileName = "/home/mayker.1/Desktop/SNeCO_Data_Products/FlatGalaxyMaps/{}FlatData.txt".format(filestr)
-        if os.path.isfile(fileName):
-            flatData = Table.read(fileName, format = "ascii") 
-            distArr = distList
-        else:
-            return(np.float('nan'),np.float('nan'))
-    
-    #apply SNR cutoff
-    intenCut, distCut, massCut = [],[],[]
-    for i in range(len(flatData)):
-        if (flatData["SNR"][i] >= SNRcutoff):
-            intenCut.append(flatData["Intensity"][i])
-            distCut.append(distArr[i])
-            massCut.append(flatData["mass"][i])
-
-    if kind == 'SNR':
-        valFound, nearestMCSN = findNearest(np.array(distArr), value, np.array(distArr))    
-    elif kind == 'Intensity':
-        valFound, nearestMCSN = findNearest(np.array(intenCut), value, np.array(distCut))
-    else:
-        valFound, nearestMCSN = findNearest(np.array(massCut), value, np.array(distCut))
-
-    return(nearestMCSN, valFound)  
+    return(mindist)
