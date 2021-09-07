@@ -14,7 +14,7 @@ def mass2int(mass, aco, res=150.0):
     return(inten)
 
 def angDistToPc(x,galDist):
-    return(galDist*1000*np.tan(x*np.pi/180))
+    return(galDist*10**6*np.tan(x*np.pi/180))
 
 def findNearest(x1,x2,y1,y2):
     # Where x1 & y1 are 1d arrays of map coordinates

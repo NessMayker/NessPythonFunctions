@@ -64,7 +64,8 @@ def deproject(center_coord=None, incl=0*u.deg, pa=0*u.deg,
     in the `cpropstoo` package. See URL below:
     https://github.com/akleroy/cpropstoo/blob/master/cubes/deproject.pro
     """
-
+    if(incl == 90.0):
+	raise ValueError("Inclination of 90 degrees. Deproject will not behave as expected.")
     if isinstance(center_coord, SkyCoord):
         x0_deg = center_coord.ra.degree
         y0_deg = center_coord.dec.degree
