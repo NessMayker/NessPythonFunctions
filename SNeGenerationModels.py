@@ -1,3 +1,7 @@
+
+"""For generating values for visualization set return distVals = False
+For model 1: set modelType = 1"""
+
 import os
 import numpy as np
 import astropy.io.fits as pyfits
@@ -10,11 +14,11 @@ import sys
 sys.path.append('/home/mayker.1/Desktop/PythonFunctions')
 from deprojectGalaxy import deproject
 from normalize import norm
+from FindNearestMC import angDistToPc, findNearest
 
 
-
-def runModels(galaxy, image, centerCoord, pa, incl, galDist, modelType = 1):
-    rX, rY = [],[]
+def runModels(galaxy, image, centerCoord, pa, incl, galDist, modelType = 1, returnDistVals = False):
+    rX, rY, nearest = [],[],[]
    
     if os.path.isfile(image):
 
@@ -58,6 +62,7 @@ def runModels(galaxy, image, centerCoord, pa, incl, galDist, modelType = 1):
                 
                 rX.append(ra[randIntX])
                 rY.append(dec[randIntY])
+		nearest.append(angDistToPc(findNearest(dx, dx[randIntX], dy, dy[randIntY])), galDist)
 
             #if model is gas density weighted
             else:
@@ -74,8 +79,15 @@ def runModels(galaxy, image, centerCoord, pa, incl, galDist, modelType = 1):
 
                 rX.append(ra[randIntX])
                 rY.append(dec[randIntY])
-
+		nearest.append(angDistToPc(findNearest(dx, dx[randIntX], dy, dy[randIntY])), galDist)
             
-        return(rX,rY)
+        
+	if returnDistVals == false:
+		
+		return(rX,rY)
+	
+	else:
+		
+		return(rX,rY,nearest)
 
 
