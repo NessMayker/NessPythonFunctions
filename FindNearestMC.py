@@ -27,6 +27,7 @@ def mass2int(mass, aco, res=150.0):
 def angDistToPc(x,galDist):
     return(galDist*10**6*np.tan(x*np.pi/180))
 
+
 def findNearest(x1,x2,y1,y2):
     # Where x1 & y1 are 1d arrays of map coordinates
     # x2,y2 are the coords of the SNe
@@ -48,7 +49,7 @@ def findNearest(x1,x2,y1,y2):
     
     return(mindist)
 
-def nearestMCMethod(galaxy, image, errimage, alphaCOimg, centerCoord, pa, incl, galDist, otherra, otherdec, othername):
+def nearestMCMethod(galaxy, image, errimage, alphaCOimg, centerCoord, pa, incl, galDist, otherra, otherdec, othername=None):
     
     if os.path.isfile(image):
 
@@ -131,14 +132,14 @@ def nearestMCMethod(galaxy, image, errimage, alphaCOimg, centerCoord, pa, incl, 
         
         print("Nearest 65", nearestMC65, galaxy)        
         
-        print("done with", galaxy, " ", othername)  
+        print("done with", galaxy, " ")  
         return(nearestMC55, nearestMC65)
     else:
         print("No file for ", galaxy)
-        n55, n66 = [],[]
-        for j in range(len(othername)):
-            n55.append(float("nan"))
-            n66.append(float("nan"))
+
+        n55 = float("nan")
+        n66 = float("nan")
+
         return(n55, n66)
 
 

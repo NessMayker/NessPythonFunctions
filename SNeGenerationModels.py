@@ -15,112 +15,64 @@ sys.path.append('/home/mayker.1/Desktop/PythonFunctions')
 from deprojectGalaxy import deproject
 from normalize import norm
 from FindNearestMC import angDistToPc, findNearest
+from ReturnMapData import returnMapData
 
-
-def runModels(galaxy, image, centerCoord, pa, incl, galDist, modelType = 1, returnDistVals = False, starLight = None, starRa = None, starDec = None):
-    rX, rY, rX2, rY2, nearest = [],[],[],[],[]
+def runModels(galaxy, image, centerCoord, pa, incl, galDist, modelType = 1, starLight = None, starRa = None, starDec = None, expSize = 100):
+    r_ra, r_dec, r_dx, r_dy = [],[],[],[]
    
     if os.path.isfile(image):
+        inten, ra, dec, dx, dy = returnMapData(image, centerCoord=centerCoord, incl=incl, pa=pa)
+      
+        #if model is random
+        if modelType == 1:
+            numrows = len(inten)    
 
-        # read in fits files
-        hdu_int  = pyfits.open(image)
-        intMap      = hdu_int[0].data
+            rand = np.random.randint(low=0, size = expSize, high=numrows)
 
-        #Convert x & y pixels to ra and dec
-        wcs      = WCS(hdu_int[0].header, naxis=2)
-        naxis    = wcs._naxis # size of image naxis[0] = x and [1] = y
-        grid     = np.indices((naxis[1],naxis[0]))
-        ra, dec  = wcs.wcs_pix2world(grid[1],grid[0],0)
+            r_ra  = ra[rand]
+            r_dec = dec[rand]
+            r_dx  = dx[rand]
+            r_dy  = dy[rand]
 
-        #deproject ra and dec to dx and dy
-        radius, projang, dx, dy = deproject(center_coord=centerCoord, incl=incl, pa=pa, ra=ra, dec=dec,return_offset=True)
+        #if model is gas density weighted
+        elif modelType == 2:
+            intArr = np.clip(inten, 0.0, None)
+            total = sum(intArr)
+            prob  = intArr/total 
+            prob  = norm(prob)
+            n = len(intArr)
 
-        #flatten data structures 
-        f_int  = intMap.flatten()
-        f_ra   = ra.flatten()
-        f_dec  = dec.flatten()    
-        f_dx   = dx.flatten()
-        f_dy   = dy.flatten()
+            indicies = np.arange(n, dtype=int)
+            rand = np.random.choice(indicies, size = expSize, p=prob)
 
-        #remove nans
-        keep  = np.where(np.isfinite(f_int))
+            r_ra  = ra[rand]
+            r_dec = dec[rand]
+            r_dx  = dx[rand]
+            r_dy  = dy[rand]
 
-        ra    = f_ra[keep[0]]
-        dec   = f_dec[keep[0]]
-        inten = f_int[keep[0]]
-        dx    = f_dx[keep[0]]
-        dy    = f_dy[keep[0]]
-        
-        for j in range(100):
+        elif modelType == 3:
+            intArr = np.clip(starLight, 0.0, None)
+            total = sum(intArr)
+            prob  = intArr/total 
+            prob  = norm(prob)
+            n = len(intArr)
+            indicies = np.arange(n, dtype=int)
+            rand = np.random.choice(indicies, size = expSize, p=prob)
 
-            #if model is random
-            if modelType == 1:
-                numrowsX = len(ra)    
-                numrowsY = len(dec)  
+            starRad, starPA, starDx, starDy = deproject(center_coord=centerCoord, incl=incl, pa=pa, ra=starRa, dec=starDec, return_offset=True)
 
-                randIntX = np.random.randint(low=0, high=numrowsX)
-                randIntY = np.random.randint(low=0, high=numrowsY)
-                
-                rX.append(ra[randIntX])
-                rY.append(dec[randIntY])
-                rX2.append(dx[randIntX])
-                rY2.append(dy[randIntY])
+            r_ra  = starRa[rand]
+            r_dec = starDec[rand]
+            r_dx  = starDx[rand]
+            r_dy  = starDy[rand]
 
-            #if model is gas density weighted
-            elif modelType == 2:
-                intArr = np.clip(inten, a_min=0.0, a_max=None)
-                total = sum(intArr)
-                prob  = intArr/total 
-                prob  = norm(prob)
-                nX = len(ra)
-                nY = len(dec)
-                indiciesX = np.arange(nX, dtype=int)
-                randIntX = np.random.choice(indiciesX, p=prob)
-                indiciesY = np.arange(nY, dtype=int)
-                randIntY = np.random.choice(indiciesY, p=prob)
-
-                rX.append(ra[randIntX])
-                rY.append(dec[randIntY])
-                rX2.append(dx[randIntX])
-                rY2.append(dy[randIntY])
-
-            elif modelType == 3:
-                intArr = np.clip(starLight, a_min=0.0, a_max=None)
-                total = sum(intArr)
-                prob  = intArr/total 
-                prob  = norm(prob)
-                nX = len(starRa)
-                nY = len(starDec)
-                indiciesX = np.arange(nX, dtype=int)
-                randIntX = np.random.choice(indiciesX, p=prob)
-                indiciesY = np.arange(nY, dtype=int)
-                randIntY = np.random.choice(indiciesY, p=prob)
-
-                starRad, starPA, starDx, starDy = deproject(center_coord=centerCoord, incl=incl, pa=pa, ra=starRa, dec=starDec,return_offset=True)
-
-                rX.append(starRa[randIntX])
-                rY.append(starDec[randIntY])
-                rX2.append(starDx[randIntX])
-                rY2.append(starDy[randIntY])
-
-            else: print("Wrong model choice, should be 1, 2, or 3.")
-            
-        if modelType == 1 or modelType == 2:
-            nearAng = findNearest(dx, rX1, dy, rY1)
-            nearest = angDistToPc(nearAng, galDist)
-        else:
-            nearAng = findNearest(starDx, rX2, starDy, rY2)
-            nearest = angDistToPc(nearAng, galDist)
+        else: print("Wrong model choice, should be 1, 2, or 3.")
 
 
+        return(r_ra, r_dec, r_dx, r_dy)
 
 
-        if returnDistVals == False:
-
-            return(rX,rY)
-
-        else:
-
-            return(rX,rY,nearest)
+    else:
+        pass
 
 
