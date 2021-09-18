@@ -46,29 +46,24 @@ def findNearest(x1,x2,y1,y2):
 
         mindist = np.nanmin(dist, axis = 1)
     else: 
-        mindist = float("nan")
+        mindist = np.full_like(len(x2),float("nan"))
     
     return(mindist)
 
-def nearestMCMethod(galaxy, image, errimage, alphaCOimg, centerCoord, pa, incl, galDist, otherra, otherdec, othername=None):
+def nearestMCMethod(galaxy, co_file, err_file, mass_file, centerCoord, pa, incl, galDist, otherra, otherdec, othername=None):
     
-    if os.path.isfile(image):
+    if os.path.isfile(co_file):
 
         # read in fits files
         area = (150.0/2.0)**2*np.pi/np.log(2.0)
-        hdu_int = pyfits.open(image)
+        hdu_int = pyfits.open(co_file)
         intMap  = hdu_int[0].data
 
-        hdu_err = pyfits.open(errimage)
+        hdu_err = pyfits.open(err_file)
         errMap  = hdu_err[0].data
 
-        if(os.path.isfile(alphaCOimg)):
-            hdu_aco = pyfits.open(alphaCOimg)
-
-            acoMap, footprint = reproject_interp(hdu_aco, hdu_int[0].header) 
-
-            massMap = intMap * acoMap * area
-        else: massMap = intMap * 6.7 * area
+        hdu_mass = pyfits.open(mass_file)
+        massMap  = hdu_mass[0].data 
 
         #Convert x & y pixels to ra and dec
         wcs      = WCS(hdu_int[0].header, naxis=2)
@@ -77,7 +72,7 @@ def nearestMCMethod(galaxy, image, errimage, alphaCOimg, centerCoord, pa, incl, 
         ra, dec  = wcs.wcs_pix2world(grid[1],grid[0],0)
 
         #deproject ra and dec to dx and dy
-        radius, projang, dx, dy = deproject(center_coord=centerCoord, incl=incl, pa=pa, ra=ra, dec=dec,return_offset=True)
+        radius, projang, dx, dy = deproject(center_coord=centerCoord, incl=incl, pa=pa, ra=ra, dec=dec, return_offset=True)
 
         #flatten data structures 
         f_int  = intMap.flatten()
@@ -121,7 +116,7 @@ def nearestMCMethod(galaxy, image, errimage, alphaCOimg, centerCoord, pa, incl, 
         nearestMCx55 = findNearest(dx, otherdx, dy, otherdy)
         nearestMC55 = angDistToPc(nearestMCx55,galDist)
         
-        print("Nearest 55", nearestMCx55, nearestMC55, galaxy)        
+        print("Nearest 55", nearestMC55, galaxy)        
         
         idx  = (mass > 10**6.5) 
         mass = mass[idx]
@@ -131,10 +126,11 @@ def nearestMCMethod(galaxy, image, errimage, alphaCOimg, centerCoord, pa, incl, 
         nearestMCx65 = findNearest(dx, otherdx, dy, otherdy)
         nearestMC65 = angDistToPc(nearestMCx65,galDist)                    
         
-        print("Nearest 65", nearestMCx65, nearestMC65, galaxy)        
+        print("Nearest 65", nearestMC65, galaxy)        
         
         print("done with", galaxy, " ")  
         return(nearestMC55, nearestMC65)
+
     else:
         print("No file for ", galaxy)
 
