@@ -68,11 +68,10 @@ def runModels(galaxy, image, centerCoord, pa, incl, galDist, modelType = 1, star
 
         else: print("Wrong model choice, should be 1, 2, or 3.")
 
-
         return(r_ra, r_dec, r_dx, r_dy)
 
 
     else:
-        pass
+        print("Something wrong with file or missing")
 
 

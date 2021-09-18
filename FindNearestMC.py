@@ -25,6 +25,7 @@ def mass2int(mass, aco, res=150.0):
     return(inten)
 
 def angDistToPc(x,galDist):
+    
     return(galDist*10**6*np.tan(x*np.pi/180))
 
 
@@ -55,14 +56,14 @@ def nearestMCMethod(galaxy, image, errimage, alphaCOimg, centerCoord, pa, incl, 
 
         # read in fits files
         area = (150.0/2.0)**2*np.pi/np.log(2.0)
-        hdu_int  = pyfits.open(image)
-        intMap      = hdu_int[0].data
+        hdu_int = pyfits.open(image)
+        intMap  = hdu_int[0].data
 
         hdu_err = pyfits.open(errimage)
-        errMap      = hdu_err[0].data
+        errMap  = hdu_err[0].data
 
         if(os.path.isfile(alphaCOimg)):
-            hdu_aco  = pyfits.open(alphaCOimg)
+            hdu_aco = pyfits.open(alphaCOimg)
 
             acoMap, footprint = reproject_interp(hdu_aco, hdu_int[0].header) 
 
@@ -120,7 +121,7 @@ def nearestMCMethod(galaxy, image, errimage, alphaCOimg, centerCoord, pa, incl, 
         nearestMCx55 = findNearest(dx, otherdx, dy, otherdy)
         nearestMC55 = angDistToPc(nearestMCx55,galDist)
         
-        print("Nearest 55", nearestMC55, galaxy)        
+        print("Nearest 55", nearestMCx55, nearestMC55, galaxy)        
         
         idx  = (mass > 10**6.5) 
         mass = mass[idx]
@@ -130,7 +131,7 @@ def nearestMCMethod(galaxy, image, errimage, alphaCOimg, centerCoord, pa, incl, 
         nearestMCx65 = findNearest(dx, otherdx, dy, otherdy)
         nearestMC65 = angDistToPc(nearestMCx65,galDist)                    
         
-        print("Nearest 65", nearestMC65, galaxy)        
+        print("Nearest 65", nearestMCx65, nearestMC65, galaxy)        
         
         print("done with", galaxy, " ")  
         return(nearestMC55, nearestMC65)
