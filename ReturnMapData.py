@@ -13,11 +13,11 @@ sys.path.append('/home/mayker.1/Desktop/PythonFunctions')
 from deprojectGalaxy import deproject
 
 
-def returnMapData(image, centerCoord, incl, pa):
+def returnMapData(image, aco, centerCoord, incl, pa):
 
     # read in fits files
     hdu_int  = pyfits.open(image)
-    intMap      = hdu_int[0].data
+    intMap   = hdu_int[0].data
 
     #Convert x & y pixels to ra and dec
     wcs      = WCS(hdu_int[0].header, naxis=2)
@@ -37,12 +37,19 @@ def returnMapData(image, centerCoord, incl, pa):
 
     #remove nans
     keep  = np.where(np.isfinite(f_int))
-    ra    = f_ra[keep[0]]
-    dec   = f_dec[keep[0]]
-    inten = f_int[keep[0]]
-    dx    = f_dx[keep[0]]
-    dy    = f_dy[keep[0]]
- 
-    return(inten, ra, dec, dx, dy)
+    ra    = f_ra[keep]
+    dec   = f_dec[keep]
+    inten = f_int[keep]
+    dx    = f_dx[keep]
+    dy    = f_dy[keep]
+
+    if os.path.isfile(aco):
+        hdu_aco = pyfits.open(aco)
+        acomap, footprint = reproject_interp(hdu_aco, hdu_int[0].header)
+        f_aco = acomap.flatten()
+        alphaCO = f_aco[keep]
+        alphaCO = np.nan_to_num(alphaCO, nan=6.7)
+    else: alphaCO = np.full(len(inten),6.7,dtype=float)
+    return(inten, alphaCO, ra, dec, dx, dy)
 
 

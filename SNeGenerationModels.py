@@ -17,11 +17,11 @@ from normalize import norm
 from FindNearestMC import angDistToPc, findNearest
 from ReturnMapData import returnMapData
 
-def runModels(galaxy, image, centerCoord, pa, incl, galDist, modelType = 1, starLight = None, starRa = None, starDec = None, expSize = 100):
-    r_ra, r_dec, r_dx, r_dy = [],[],[],[]
+def runModels(galaxy, image, aco, centerCoord, pa, incl, galDist, modelType = 1, starLight = None, starRa = None, starDec = None, expSize = 100):
+    r_ra, r_dec, r_dx, r_dy, r_sm = [],[],[],[],[]
    
     if os.path.isfile(image):
-        inten, ra, dec, dx, dy = returnMapData(image, centerCoord=centerCoord, incl=incl, pa=pa)
+        inten, alphaCO, ra, dec, dx, dy = returnMapData(image, aco, centerCoord=centerCoord, incl=incl, pa=pa)
       
         #if model is random
         if modelType == 1:
@@ -33,6 +33,8 @@ def runModels(galaxy, image, centerCoord, pa, incl, galDist, modelType = 1, star
             r_dec = dec[rand]
             r_dx  = dx[rand]
             r_dy  = dy[rand]
+            r_sm = inten[rand] * alphaCO[rand] * np.cos(incl*np.pi/180.)
+            
 
         #if model is gas density weighted
         elif modelType == 2:
@@ -49,6 +51,8 @@ def runModels(galaxy, image, centerCoord, pa, incl, galDist, modelType = 1, star
             r_dec = dec[rand]
             r_dx  = dx[rand]
             r_dy  = dy[rand]
+            #r_int = inten[rand]
+            r_sm = inten[rand] * alphaCO[rand] * np.cos(incl*np.pi/180.)
 
         elif modelType == 3:
             intArr = np.clip(starLight, 0.0, None)
@@ -65,10 +69,12 @@ def runModels(galaxy, image, centerCoord, pa, incl, galDist, modelType = 1, star
             r_dec = starDec[rand]
             r_dx  = starDx[rand]
             r_dy  = starDy[rand]
+            #r_int = inten[rand]
+            r_sm = inten[rand] * alphaCO[rand] * np.cos(incl*np.pi/180.)
 
         else: print("Wrong model choice, should be 1, 2, or 3.")
-
-        return(r_ra, r_dec, r_dx, r_dy)
+        print("r_sm:",r_sm)
+        return(r_ra, r_dec, r_dx, r_dy, r_sm)
 
 
     else:

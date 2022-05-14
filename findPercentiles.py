@@ -1,6 +1,6 @@
 def findStats(fracArray, valsArray):
 	'''    
-	Returns the 5,16,50,84,95th percentiles.
+	Returns the 16,50,84th percentiles.
 
 	Parameters
 	----------
@@ -12,7 +12,7 @@ def findStats(fracArray, valsArray):
 	Returns
 	-------
 	stats : array of floats
-		array of floats that has each of the 5,16,50,84,95th percentiles.   
+		array of floats that has each of the 16,50,84th percentiles.   
 	'''
 
 	import numpy as np
@@ -22,12 +22,13 @@ def findStats(fracArray, valsArray):
 	sys.path.append('/home/mayker.1/Desktop/NessPythonFunctions')
 	from findAtIndex import atIndex
 
-	K = [0.05,0.16,0.5,0.84,0.95]
+	K = [0.16,0.5,0.84]
 	stats = []
 
 	for i in range(len(K)):
 		val = atIndex(fracArray,K[i],valsArray)
 		rndVal = round(val, 2)
+		#rndVal = val
 		stats.append(rndVal)
 
 	return(stats)

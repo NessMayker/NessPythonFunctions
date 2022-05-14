@@ -16,7 +16,7 @@ def findErrVals(errArray):
     lowErr = nonZeroErrVals[0]
     # aveErr = np.average(nonZeroErrVals)
     # medErr = np.median(nonZeroErrVals)
-    
+    # print(lowErr)
     return(lowErr)
 
 def nonZeroErrArray(errVals, usedErr):
